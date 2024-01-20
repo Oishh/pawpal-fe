@@ -41,8 +41,8 @@ export default function Adopt() {
       _postData["pets"] = _ids;
 
       const authData = await pb.admins.authWithPassword(
-        process.env.AUTH_USER,
-        process.env.AUTH_PASS
+        process.env.REACT_APP_AUTH_USER,
+        process.env.REACT_APP_AUTH_PASS
       );
 
       const record = await pb.collection("adoptions").create(_postData);
@@ -62,8 +62,8 @@ export default function Adopt() {
         const _data = { ...basketPets };
         const _update = { is_adopted: true };
         const authData = await pb.admins.authWithPassword(
-          process.env.AUTH_USER,
-          process.env.AUTH_PASS
+          process.env.REACT_APP_AUTH_USER,
+          process.env.REACT_APP_AUTH_PASS
         );
         const record = await pb.collection("pets").update(_data[x].id, _update);
 
@@ -78,8 +78,8 @@ export default function Adopt() {
     const fetchPets = async () => {
       try {
         const authData = await pb.admins.authWithPassword(
-          process.env.AUTH_USER,
-          process.env.AUTH_PASS
+          process.env.REACT_APP_AUTH_USER,
+          process.env.REACT_APP_AUTH_PASS
         );
         const records = await pb.collection("pets").getFullList({
           sort: "-created",
