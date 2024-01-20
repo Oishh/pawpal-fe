@@ -1,5 +1,6 @@
 import { Button } from "primereact/button";
 import bg from "../../resources/zzz.jpg";
+import { Link } from "react-router-dom";
 
 export default function Home() {
   return (
@@ -25,22 +26,22 @@ export default function Home() {
               animals. Together, we can turn compassion into action.
             </span>
 
-            <a href="/pawpal/adopt">
+            <Link to="/pawpal/adopt">
               <Button
                 label="Adopt Now"
                 type="button"
                 className="mr-3 p-button-raised"
                 severity="info"
               ></Button>
-            </a>
-            <a href="/pawpal/donate">
+            </Link>
+            <Link to="/pawpal/donate">
               <Button
                 label="Donate"
                 type="button"
                 severity="primary"
                 raised
               ></Button>
-            </a>
+            </Link>
           </section>
         </div>
       </div>
