@@ -1,5 +1,5 @@
 import React from "react";
-import logo from "../resources/pawpal_temp.png";
+import logo from "../resources/pawpal_icon.png";
 
 function Navbar() {
   return (

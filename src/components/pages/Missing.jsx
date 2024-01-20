@@ -24,8 +24,8 @@ export default function Missing() {
   const fetchPosts = async () => {
     try {
       const authData = await pb.admins.authWithPassword(
-        "matienzoherald@gmail.com",
-        "SL4cTYWdpz"
+        process.env.AUTH_USER,
+        process.env.AUTH_PASS
       );
       const records = await pb.collection("missings").getFullList({
         sort: "-created",
@@ -47,8 +47,8 @@ export default function Missing() {
         console.log("formData: {}", formData);
 
         const authData = await pb.admins.authWithPassword(
-          "matienzoherald@gmail.com",
-          "SL4cTYWdpz"
+          process.env.AUTH_USER,
+          process.env.AUTH_PASS
         );
 
         const record = await pb.collection("missings").create(formData);
