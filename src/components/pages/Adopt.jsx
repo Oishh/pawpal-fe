@@ -70,8 +70,6 @@ export default function Adopt() {
         setInfo(false);
         toastPostSuccess(record.name);
         setIsDisabled(false);
-
-        setTimeout(() => window.location.reload(), 2000);
       }
     } catch (ex) {
       console.log("{}", ex);
