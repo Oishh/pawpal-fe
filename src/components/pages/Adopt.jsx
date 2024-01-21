@@ -15,6 +15,7 @@ const pb = new PocketBase("https://pawpal-backend.pockethost.io");
 export default function Adopt() {
   const [nonAdoptedPets, setNonAdoptedPets] = useState([]);
   const [basketPets, setBasketPets] = useState([]);
+  const [isDisabled, setIsDisabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [personInfo, setPersonInfo] = useState({
     name: "",
@@ -49,8 +50,6 @@ export default function Adopt() {
       updateStatus();
       console.log("post: {}", record);
       console.log("adopt_data: {}", _postData);
-      setInfo(false);
-      toastPostSuccess();
     } catch (ex) {
       console.log("{}", ex);
     }
@@ -67,7 +66,12 @@ export default function Adopt() {
         );
         const record = await pb.collection("pets").update(_data[x].id, _update);
 
-        console.log("record: {}", record);
+        console.log("update record: {}", record);
+        setInfo(false);
+        toastPostSuccess(record.name);
+        setIsDisabled(false);
+
+        setTimeout(() => window.location.reload(), 2000);
       }
     } catch (ex) {
       console.log("{}", ex);
@@ -98,11 +102,10 @@ export default function Adopt() {
         }
 
         setNonAdoptedPets(nonAdopted);
+        setLoading(false);
         console.log("NA Pets: {}", nonAdopted);
       } catch (ex) {
         console.log("{}", ex);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -118,11 +121,11 @@ export default function Adopt() {
     });
   };
 
-  const toastPostSuccess = () => {
+  const toastPostSuccess = (name) => {
     toast.current.show({
       severity: "success",
       summary: "Successful",
-      detail: `Pet has been successfully adopted!`,
+      detail: `${name} has been successfully adopted!`,
       life: 2000,
     });
   };
@@ -241,10 +244,14 @@ export default function Adopt() {
   const postFooterDialog = (
     <div>
       <Button
-        label="Adopt Now"
-        icon="pi pi-check"
+        disabled={isDisabled}
+        label={
+          isDisabled ? <i className="pi pi-spin pi-spinner" /> : "Adopt Now"
+        }
+        icon={isDisabled ? null : "pi pi-check"}
         onClick={() => {
           postData();
+          setIsDisabled(true);
         }}
         severity="primary"
       />
@@ -332,18 +339,28 @@ export default function Adopt() {
         </div>
       );
     } else {
-      return (
-        <Carousel
-          value={nonAdoptedPets}
-          numVisible={3}
-          numScroll={3}
-          responsiveOptions={responsiveOptions}
-          className="custom-carousel"
-          circular
-          autoplayInterval={3000}
-          itemTemplate={petTemplate}
-        />
-      );
+      if (nonAdoptedPets.length === 0) {
+        return (
+          <div className="flex justify-content-center">
+            <span className="text-2xl font-medium text-black">
+              No adoptables yet.
+            </span>
+          </div>
+        );
+      } else {
+        return (
+          <Carousel
+            value={nonAdoptedPets}
+            numVisible={3}
+            numScroll={3}
+            responsiveOptions={responsiveOptions}
+            className="custom-carousel"
+            circular
+            autoplayInterval={3000}
+            itemTemplate={petTemplate}
+          />
+        );
+      }
     }
   };
 

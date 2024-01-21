@@ -15,7 +15,7 @@ export default function Missing() {
   const [post, setPost] = useState([]);
   const [postInfo, setPostInfo] = useState([]);
   const [view, setView] = useState(false);
-  // const [ready, setReady] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
   const [file, setFile] = useState(null);
   const [fileDataURL, setFileDataURL] = useState(null);
   const formData = new FormData();
@@ -55,6 +55,9 @@ export default function Missing() {
         console.log("post: {}", record);
         setView(false);
         toastSuccess();
+        setIsDisabled(false);
+
+        setTimeout(() => window.location.reload(), 2000);
       } else {
         toast.current.show({
           severity: "error",
@@ -192,11 +195,12 @@ export default function Missing() {
   const viewFooterDialog = (
     <div>
       <Button
-        // disabled={ready === false}
-        label="Post"
-        icon="pi pi-check"
+        disabled={isDisabled}
+        label={isDisabled ? <i className="pi pi-spin pi-spinner" /> : "Post"}
+        icon={isDisabled ? null : "pi pi-check"}
         onClick={() => {
           postMissing();
+          setIsDisabled(true);
         }}
         severity="primary"
       />
