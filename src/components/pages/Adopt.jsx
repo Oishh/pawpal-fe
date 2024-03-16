@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import { Button } from "primereact/button";
 import { Carousel } from "primereact/carousel";
 import { Dialog } from "primereact/dialog";
@@ -21,35 +21,48 @@ export default function Adopt() {
     name: "",
     contact: 0,
   });
-  const [view, setView] = useState(false);
+
+  const [showBasket, setShowBasket] = useState(false);
+
   const [info, setInfo] = useState(false);
 
   const toast = useRef(null);
 
   const postData = async () => {
     try {
-      const _postData = {};
-      _postData["name"] = personInfo.name;
-      _postData["contact"] = personInfo.contact;
-      let _ids = [];
+      if (personInfo.name === "" || personInfo.contact === 0) {
+        toast.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: "Please fill out the form.",
+          life: 2000,
+        });
+        return;
+      } else {
+        setIsDisabled(true);
+        const _postData = {};
+        _postData["name"] = personInfo.name;
+        _postData["contact"] = personInfo.contact;
+        let _ids = [];
 
-      for (let i = 0; i < basketPets.length; i++) {
-        _ids.push(basketPets[i].id);
+        for (let i = 0; i < basketPets.length; i++) {
+          _ids.push(basketPets[i].id);
+        }
+
+        console.log("ids: {}", _ids);
+
+        _postData["pets"] = _ids;
+
+        const authData = await pb.admins.authWithPassword(
+          "matienzoherald@gmail.com",
+          "SL4cTYWdpz"
+        );
+
+        const record = await pb.collection("adoptions").create(_postData);
+        updateStatus();
+        console.log("post: {}", record);
+        console.log("adopt_data: {}", _postData);
       }
-
-      console.log("ids: {}", _ids);
-
-      _postData["pets"] = _ids;
-
-      const authData = await pb.admins.authWithPassword(
-        process.env.REACT_APP_AUTH_USER,
-        process.env.REACT_APP_AUTH_PASS
-      );
-
-      const record = await pb.collection("adoptions").create(_postData);
-      updateStatus();
-      console.log("post: {}", record);
-      console.log("adopt_data: {}", _postData);
     } catch (ex) {
       console.log("{}", ex);
     }
@@ -61,8 +74,8 @@ export default function Adopt() {
         const _data = { ...basketPets };
         const _update = { is_adopted: true };
         const authData = await pb.admins.authWithPassword(
-          process.env.REACT_APP_AUTH_USER,
-          process.env.REACT_APP_AUTH_PASS
+          "matienzoherald@gmail.com",
+          "SL4cTYWdpz"
         );
         const record = await pb.collection("pets").update(_data[x].id, _update);
 
@@ -80,8 +93,8 @@ export default function Adopt() {
     const fetchPets = async () => {
       try {
         const authData = await pb.admins.authWithPassword(
-          process.env.REACT_APP_AUTH_USER,
-          process.env.REACT_APP_AUTH_PASS
+          "matienzoherald@gmail.com",
+          "SL4cTYWdpz"
         );
         const records = await pb.collection("pets").getFullList({
           sort: "-created",
@@ -109,6 +122,15 @@ export default function Adopt() {
 
     fetchPets();
   }, []);
+
+  const toastNoDuplicates = () => {
+    toast.current.show({
+      severity: "error",
+      summary: "Error",
+      detail: `Cannot adopt the same pet twice.`,
+      life: 2000,
+    });
+  };
 
   const toastBasketSuccess = () => {
     toast.current.show({
@@ -153,9 +175,14 @@ export default function Adopt() {
 
   const addToBasket = (product) => {
     const _basketPets = [...basketPets];
-    _basketPets.push(product);
-    toastBasketSuccess();
-    setBasketPets(_basketPets);
+    if (_basketPets.some((pet) => pet.id === product.id)) {
+      toastNoDuplicates();
+      return;
+    } else {
+      _basketPets.push(product);
+      toastBasketSuccess();
+      setBasketPets(_basketPets);
+    }
   };
 
   const imgUrl = "https://pawpal-backend.pockethost.io/api/files/";
@@ -231,7 +258,7 @@ export default function Adopt() {
         label="Adopt Now"
         icon="pi pi-check"
         onClick={() => {
-          setView(false);
+          setShowBasket(false);
           setInfo(true);
         }}
         severity="primary"
@@ -249,7 +276,6 @@ export default function Adopt() {
         icon={isDisabled ? null : "pi pi-check"}
         onClick={() => {
           postData();
-          setIsDisabled(true);
         }}
         severity="primary"
       />
@@ -370,15 +396,22 @@ export default function Adopt() {
         <span className="block text-5xl font-bold text-black text-center">
           OUR ADOPTABLES
         </span>
-        <div className="absolute top-0 right-0">
-          <i
-            className="pi pi-shopping-bag text-white text-right mr-4 mt-4"
-            style={{ fontSize: "1.5rem", cursor: "pointer" }}
-            onClick={() => {
-              setView(true);
-            }}
-          ></i>
-        </div>
+
+        <i
+          className="lg:hidden pi pi-shopping-bag text-white text-right absolute sm:left-0 top-0 z-5 py-6 mx-7"
+          style={{ fontSize: "1.8rem", cursor: "pointer" }}
+          onClick={() => {
+            setShowBasket(true);
+          }}
+        ></i>
+
+        <i
+          className="hidden pi pi-shopping-bag text-white text-right absolute lg:block right-0 top-0 z-5 py-6 mx-7"
+          style={{ fontSize: "1.8rem", cursor: "pointer" }}
+          onClick={() => {
+            setShowBasket(true);
+          }}
+        ></i>
 
         <div className="pt-2">
           <span className="block text-2xl text-black text-center">
@@ -390,11 +423,11 @@ export default function Adopt() {
       </div>
       <Dialog
         header="Adoptables"
-        visible={view}
+        visible={showBasket === true}
         className="p-fluid"
         style={{ width: "50vw" }}
         onHide={() => {
-          setView(false);
+          setShowBasket(false);
         }}
         footer={viewFooterDialog}
       >

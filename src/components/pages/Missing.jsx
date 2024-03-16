@@ -24,8 +24,8 @@ export default function Missing() {
   const fetchPosts = async () => {
     try {
       const authData = await pb.admins.authWithPassword(
-        process.env.REACT_APP_AUTH_USER,
-        process.env.REACT_APP_AUTH_PASS
+        "matienzoherald@gmail.com",
+        "SL4cTYWdpz"
       );
       const records = await pb.collection("missings").getFullList({
         sort: "-created",
@@ -39,7 +39,16 @@ export default function Missing() {
 
   const postMissing = async () => {
     try {
-      if (fileDataURL != null) {
+      if (fileDataURL === null || postInfo.name === "" || postInfo.description === "") {
+        toast.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: `Please fill out the form.`,
+          life: 2000,
+        });
+      } else {
+        setIsDisabled(true);
+
         formData.append("name", postInfo.name);
         formData.append("description", postInfo.description);
         formData.append("attachment", file);
@@ -47,8 +56,8 @@ export default function Missing() {
         console.log("formData: {}", formData);
 
         const authData = await pb.admins.authWithPassword(
-          process.env.REACT_APP_AUTH_USER,
-          process.env.REACT_APP_AUTH_PASS
+          "matienzoherald@gmail.com",
+          "SL4cTYWdpz"
         );
 
         const record = await pb.collection("missings").create(formData);
@@ -58,13 +67,6 @@ export default function Missing() {
         setIsDisabled(false);
 
         setTimeout(() => window.location.reload(), 2000);
-      } else {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: `Please upload an image.`,
-          life: 2000,
-        });
       }
     } catch (ex) {
       console.log("{}", ex);
@@ -200,7 +202,6 @@ export default function Missing() {
         icon={isDisabled ? null : "pi pi-check"}
         onClick={() => {
           postMissing();
-          setIsDisabled(true);
         }}
         severity="primary"
       />
